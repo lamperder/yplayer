@@ -47,7 +47,7 @@ function onPlayerStateChange(event) {
         if ($("#youtube-video-repeat").hasClass("mdl-button--colored")) {
             player.playVideo();
         } else {
-            var next = findNextSong();            
+            var next = findNextSong();
             player.loadVideoById(next.prop("data-id"));
             next.siblings().removeClass("active");
             next.addClass("active");
@@ -58,11 +58,15 @@ function onPlayerStateChange(event) {
 
 Sortable.create(document.getElementById("youtube-list"));
 
-if (localStorage.song) {
-    var songs = JSON.parse(localStorage.song);
-    songs.forEach(function(song, index) {
-        $("#youtube-list").append(createSongList(song[0], song[1], index));
-    })
+var songList;
+if (!localStorage.song) {
+    songList = [];
+    localStorage.setItem("song", '[]');
+} else {
+    songList = JSON.parse(localStorage.song);
+    songList.forEach(function(song, index) {
+        $("#youtube-list").append(createSongList(song[0], song[1], index, song[2]));
+    });
 }
 
 
@@ -107,9 +111,8 @@ $("#youtube-list-add").on("click", function(e) {
 
     if (name !== "" && url !== "") {
         $("#youtube-list").append(createSongList(name, url, $("#youtube-list-area li").length));
-        var songs = JSON.parse(localStorage.song);
-        songs.push([name, url]);
-        localStorage.song = JSON.stringify(songs);
+        songList.push([name, url, "p" + new Date().getTime()]);
+        localStorage.song = JSON.stringify(songList);
 
         $("#youtube-list-add-success").show().animate({
             opacity: "toggle"
@@ -128,6 +131,21 @@ $("#youtube-list").on("click", function(e) {
         li.siblings().removeClass("active");
         li.addClass("active");
     }
+
+    if (target.hasClass("song-remove")) {
+        var pid = target.prop("id").replace("song-remove-", "");
+        var li = $("#" + pid);
+            li.remove();
+            var removeTarget;
+                if (song[2] === pid) {
+                    removeTarget = index;
+                }
+            });
+            songList.splice(removeTarget, 1);
+            localStorage.song = JSON.stringify(songList);
+            alert("播放中的歌曲，無法刪除");
+        }
+    }
 });
 
 function whichControlActive(control) {
@@ -140,7 +158,7 @@ function findNextSong() {
     var now = $("#youtube-list li.active").index();
     var next;
     for (var i = now; i < length; i++) {
-        var li =  $("#youtube-list li").eq(i);
+        var li = $("#youtube-list li").eq(i);
         if ($("input", li).prop("checked") && i !== now) {
             next = li;
             break;
@@ -152,7 +170,7 @@ function findNextSong() {
     return next;
 }
 
-function createSongList(name, url, index) {
+function createSongList(name, url, index, pid) {
     var span = $("<span/>");
     span.addClass("mdl-list__item-primary-content");
     span.text(name);
@@ -163,9 +181,12 @@ function createSongList(name, url, index) {
         '"><input type="checkbox" id="list-switch-' + index + '" class="mdl-switch__input" checked /></label>'));
 
     var li = $("<li/>");
+    li.prop("id", pid);
     li.addClass("mdl-list__item");
     li.prop("data-id", url);
     li.append(span);
+    li.append('<i id="song-remove-' + pid + '" class="material-icons song-remove">backspace</i>' +
+        '<div class="mdl-tooltip mdl-tooltip--left" for="song-remove-' + pid + '">刪除歌曲</div>');
     li.append(switcher);
     return li;
 }
