@@ -135,14 +135,17 @@ $("#youtube-list").on("click", function(e) {
     if (target.hasClass("song-remove")) {
         var pid = target.prop("id").replace("song-remove-", "");
         var li = $("#" + pid);
+        if (!li.hasClass("active")) {
             li.remove();
             var removeTarget;
+            songList.forEach(function(song, index) {
                 if (song[2] === pid) {
                     removeTarget = index;
                 }
             });
             songList.splice(removeTarget, 1);
             localStorage.song = JSON.stringify(songList);
+        } else {
             alert("播放中的歌曲，無法刪除");
         }
     }
