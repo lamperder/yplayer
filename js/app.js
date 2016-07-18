@@ -112,7 +112,8 @@ $("#youtube-list-add").on("click", function(e) {
     if (name !== "" && url !== "") {
         $("#youtube-list").append(createSongList(name, url, $("#youtube-list-area li").length));
         songList.push([name, url, "p" + new Date().getTime()]);
-        localStorage.song = JSON.stringify(songList);
+        // localStorage.song = JSON.stringify(songList);
+        localStorage.setItem("song", JSON.stringify(songList));
 
         $("#youtube-list-add-success").show().animate({
             opacity: "toggle"
@@ -144,7 +145,8 @@ $("#youtube-list").on("click", function(e) {
                 }
             });
             songList.splice(removeTarget, 1);
-            localStorage.song = JSON.stringify(songList);
+            // localStorage.song = JSON.stringify(songList);
+            localStorage.setItem("song", JSON.stringify(songList));
         } else {
             alert("播放中的歌曲，無法刪除");
         }
